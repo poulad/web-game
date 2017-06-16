@@ -1,5 +1,6 @@
 var DisplayObject = createjs.DisplayObject;
 var Bitmap = createjs.Bitmap;
+var Ease = createjs.Ease;
 var canvas;
 var stage;
 var tileLength;
@@ -50,6 +51,8 @@ function gameFinished(isWin) {
     setTimeout(function () { return alert("Click on the canvas to start a new game"); }, 2000);
 }
 function moveCavemanTo(newRow, newCol) {
+    var easeFunction = Ease.linear;
+    var tweenTime = 350;
     switch (worldMap[newRow][newCol]) {
         case Tile.Wall:
             console.warn("Caveman cannot pass the wall!");
@@ -57,6 +60,8 @@ function moveCavemanTo(newRow, newCol) {
         case Tile.Bats:
             caveman.row = cache.initCell[0];
             caveman.col = cache.initCell[1];
+            easeFunction = Ease.bounceInOut;
+            tweenTime = 900;
             console.warn("Bats scared him. He ran away to the cave entrance.");
             break;
         case Tile.Dino:
@@ -70,8 +75,16 @@ function moveCavemanTo(newRow, newCol) {
             caveman.col = newCol;
             break;
     }
-    caveman.bitmap.x = tileLength * caveman.col;
-    caveman.bitmap.y = tileLength * caveman.row;
+    window.removeEventListener("keydown", handleKeyDown);
+    createjs.Tween
+        .get(caveman.bitmap)
+        .to({
+        x: tileLength * caveman.col,
+        y: tileLength * caveman.row,
+    }, tweenTime, easeFunction)
+        .call(function () {
+        window.addEventListener("keydown", handleKeyDown);
+    });
     if (worldMap[newRow][newCol] !== Tile.Init) {
         stage.removeChild(gameObjects[newRow][newCol][1]);
     }
@@ -183,6 +196,7 @@ function startGame() {
         }
     }
     drawGameObjects();
+    stage.setChildIndex(caveman.bitmap, stage.getNumChildren() - 1);
     window.addEventListener("keydown", handleKeyDown);
 }
 function drawGameMenu() {
