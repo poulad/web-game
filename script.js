@@ -55,14 +55,30 @@ function moveCavemanTo(newRow, newCol) {
     var tweenTime = 350;
     switch (worldMap[newRow][newCol]) {
         case Tile.Wall:
-            console.warn("Caveman cannot pass the wall!");
+            var wallMsg = "Caveman cannot pass the wall!";
+            console.warn(wallMsg);
+            var wallText_1 = new createjs.Text(wallMsg, "bold 20px Arial", 'yellow');
+            wallText_1.x = 10;
+            wallText_1.y = canvas.height - wallText_1.getMeasuredLineHeight() - 10;
+            stage.addChild(wallText_1);
+            setTimeout(function () {
+                stage.removeChild(wallText_1);
+            }, 1000);
             break;
         case Tile.Bats:
             caveman.row = cache.initCell[0];
             caveman.col = cache.initCell[1];
             easeFunction = Ease.bounceInOut;
             tweenTime = 900;
-            console.warn("Bats scared him. He ran away to the cave entrance.");
+            var batsMsg = "Bats scared him. He ran away to the cave entrance.";
+            console.warn(batsMsg);
+            var batsText_1 = new createjs.Text(batsMsg, "bold 20px Arial", 'orange');
+            batsText_1.x = 10;
+            batsText_1.y = canvas.height - batsText_1.getMeasuredLineHeight() - 10;
+            stage.addChild(batsText_1);
+            setTimeout(function () {
+                stage.removeChild(batsText_1);
+            }, 2000);
             break;
         case Tile.Dino:
             gameFinished(false);
@@ -93,22 +109,26 @@ function handleKeyDown(e) {
     var newRow = caveman.row;
     var newCol = caveman.col;
     switch (e.keyCode) {
-        case 37:
+        case 37: // Left arrow
+        case 65:
             if (0 < caveman.col) {
                 newCol -= 1;
             }
             break;
-        case 38:
+        case 38: // Up arrow
+        case 87:
             if (caveman.row > 0) {
                 newRow -= 1;
             }
             break;
-        case 39:
+        case 39: // Right arrow
+        case 68:
             if (caveman.col < (worldMap[caveman.row].length - 1)) {
                 newCol += 1;
             }
             break;
-        case 40:
+        case 40: // South arrow
+        case 83:
             if (caveman.row < (worldMap.length - 1)) {
                 newRow += 1;
             }
