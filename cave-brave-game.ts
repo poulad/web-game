@@ -38,11 +38,12 @@ namespace CaveBrave {
 
         private _cache: any = {};
 
-        private _c: HTMLCanvasElement;
+        private _clickHandler: EventListener = this.startGame.bind(this);
+
+        private _keyHandler: EventListener = this.handleKeyDown.bind(this);
 
         constructor(private _canvas: HTMLCanvasElement) {
             this._stage = new Stage(_canvas);
-            this._c = _canvas;
 
             Ticker.addEventListener("tick", () => {
                 this._stage.update();
@@ -66,7 +67,7 @@ namespace CaveBrave {
 
         public start(): void {
             this.drawMenu();
-            this._canvas.addEventListener(`click`, this.startGame);
+            this._canvas.addEventListener(`click`, this._clickHandler);
         }
 
         private drawMenu(): void {
@@ -88,7 +89,7 @@ namespace CaveBrave {
         }
 
         private startGame(): void {
-            this._canvas.removeEventListener(`click`, this.startGame);
+            this._canvas.removeEventListener(`click`, this._clickHandler);
             this._stage.removeAllChildren();
 
             this._gameObjects = new Array(Game.WorldMap.length);
@@ -102,7 +103,7 @@ namespace CaveBrave {
 
             this._stage.setChildIndex(this._caveman.bitmap, this._stage.getNumChildren() - 1);
 
-            window.addEventListener("keydown", this.handleKeyDown);
+            window.addEventListener("keydown", this._keyHandler);
         }
 
         private drawGameObjects(): void {
@@ -155,8 +156,6 @@ namespace CaveBrave {
             obj1 = this.getCachedBitmap(img1Src);
             obj2 = this.getCachedBitmap(img2Src);
 
-
-            console.error("Check me here");
             const scaleFactor = this._tileLength / 200;
             obj1.scaleX = scaleFactor;
             obj1.scaleY = scaleFactor;
@@ -186,6 +185,8 @@ namespace CaveBrave {
         }
 
         private handleKeyDown(e: KeyboardEvent): void {
+            window.removeEventListener(`keydown`, this._keyHandler);
+
             let newRow = this._caveman.row;
             let newCol = this._caveman.col;
 
@@ -218,6 +219,8 @@ namespace CaveBrave {
 
             if (newRow !== this._caveman.row || newCol !== this._caveman.col) {
                 this.moveCavemanTo(newRow, newCol);
+            } else {
+                window.addEventListener(`keydown`, this._keyHandler);
             }
         }
 
@@ -253,25 +256,32 @@ namespace CaveBrave {
                     }, 2000);
                     break;
                 case Tile.Dino:
+                    if (Game.WorldMap[newRow][newCol] !== Tile.Init) {
+                        this._stage.removeChild(this._gameObjects[newRow][newCol][1]);
+                    }
                     this.gameFinished(false);
-                    break;
+                    return;
                 case Tile.Dest:
+                    if (Game.WorldMap[newRow][newCol] !== Tile.Init) {
+                        this._stage.removeChild(this._gameObjects[newRow][newCol][1]);
+                    }
                     this.gameFinished(true);
-                    break;
+                    return;
                 default:
                     this._caveman.row = newRow;
                     this._caveman.col = newCol;
                     break;
             }
 
-            window.removeEventListener("keydown", this.handleKeyDown);
+            this._caveman.isOnMove = true;
             Tween.get(this._caveman.bitmap)
                 .to({
                     x: this._tileLength * this._caveman.col,
                     y: this._tileLength * this._caveman.row,
                 }, tweenTime, easeFunction)
                 .call(() => {
-                    window.addEventListener("keydown", this.handleKeyDown);
+                    this._caveman.isOnMove = false;
+                    window.addEventListener(`keydown`, this._keyHandler);
                 });
 
             if (Game.WorldMap[newRow][newCol] !== Tile.Init) {
@@ -280,7 +290,6 @@ namespace CaveBrave {
         }
 
         private gameFinished(isWin: boolean) {
-            window.removeEventListener("keydown", this.handleKeyDown);
             let text: createjs.Text;
             if (isWin) {
                 text = new createjs.Text(`CAVEMAN FOUND THE WHEEL!`, 'sans-serif', 'lime');
@@ -304,7 +313,7 @@ namespace CaveBrave {
             this._stage.addChild(rect);
             this._stage.addChild(text);
 
-            this._canvas.addEventListener(`click`, this.startGame);
+            this._canvas.addEventListener(`click`, this._clickHandler);
 
             setTimeout(() => alert(`Click on the canvas to start a new game`), 2000);
         }
