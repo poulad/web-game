@@ -6,7 +6,7 @@
 
 namespace CaveBrave {
     /**
-     * Holds type of cells in the game
+     * Holds different types of objects in the game
      */
     export enum Tile {
         Init, // starting point - cave entrance

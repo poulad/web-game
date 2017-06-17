@@ -12,7 +12,14 @@ var Tween = createjs.Tween;
 var Shape = createjs.Shape;
 var CaveBrave;
 (function (CaveBrave) {
+    /**
+     * Manages a Cave Brave game within a canvas
+     */
     var Game = (function () {
+        /**
+         * Constructs the game and loads necessary assets
+         * @param _canvas Canvas element for drawing game object to
+         */
         function Game(_canvas) {
             var _this = this;
             this._canvas = _canvas;
@@ -38,10 +45,16 @@ var CaveBrave;
                 { id: "wheel.svg", src: "assets/wheel.svg", type: createjs.LoadQueue.IMAGE },
             ]);
         }
+        /**
+         * Starts the game menu
+         */
         Game.prototype.start = function () {
             this.drawMenu();
             this._canvas.addEventListener("click", this._clickHandler);
         };
+        /**
+         * Draw game menu on the stage
+         */
         Game.prototype.drawMenu = function () {
             var caveBmp = new Bitmap(this._queue.getResult("cave.svg"));
             var manBmp = new Bitmap(this._queue.getResult("caveman.svg"));
@@ -55,6 +68,9 @@ var CaveBrave;
             this._stage.addChild(manBmp);
             this._stage.addChild(text);
         };
+        /**
+         * Populates the game stage according to the map and wires key event listeners
+         */
         Game.prototype.startGame = function () {
             this._canvas.removeEventListener("click", this._clickHandler);
             this._stage.removeAllChildren();
@@ -69,6 +85,9 @@ var CaveBrave;
             this._stage.setChildIndex(this._caveman.bitmap, this._stage.getNumChildren() - 1);
             window.addEventListener("keydown", this._keyHandler);
         };
+        /**
+         * Draws objects in cells based on the world map
+         */
         Game.prototype.drawGameObjects = function () {
             for (var i = 0; i < Game.WorldMap.length; i++) {
                 for (var j = 0; j < Game.WorldMap[i].length; j++) {
@@ -83,6 +102,15 @@ var CaveBrave;
                 }
             }
         };
+        /**
+         * Draws a game objects in a cell
+         * Two objects are drawn in each cell and the second object (on top) is the FOG by default.
+         * Objects are added to respective cell in `this._gameObjects` after drawing.
+         * @param tileType Type of object to be drawn
+         * @param row row number for cell
+         * @param col column index for cell
+         * @returns {createjs.Bitmap[]} Array of two objects drawn in that cell
+         */
         Game.prototype.drawBitmapsAtCell = function (tileType, row, col) {
             var img1Src;
             var img2Src = null;
@@ -126,6 +154,12 @@ var CaveBrave;
             this._stage.addChild(obj2);
             return this._gameObjects[row][col];
         };
+        /**
+         * Provides the Bitmap object from cache.
+         * If bitmap is not already cached, first caches a new bitmap and then returns it.
+         * @param id Key for the cached object
+         * @returns {createjs.Bitmap} Bitmap object of cached object
+         */
         Game.prototype.getCachedBitmap = function (id) {
             if (this._cache.hasOwnProperty(id)) {
                 return this._cache[id].clone();
@@ -136,6 +170,10 @@ var CaveBrave;
                 return obj;
             }
         };
+        /**
+         * Handles key down events of the window and moves the caveman if any of the movement keys are pressed.
+         * @param e Keyboard event
+         */
         Game.prototype.handleKeyDown = function (e) {
             window.removeEventListener("keydown", this._keyHandler);
             var newRow = this._caveman.row;
@@ -173,6 +211,11 @@ var CaveBrave;
                 window.addEventListener("keydown", this._keyHandler);
             }
         };
+        /**
+         * Moves caveman to a specified cell and finishes the game if the cell is a final cell
+         * @param newRow Row index of new cell
+         * @param newCol Column index of new cell
+         */
         Game.prototype.moveCavemanTo = function (newRow, newCol) {
             var _this = this;
             var easeFunction = Ease.linear;
@@ -235,6 +278,10 @@ var CaveBrave;
                 this._stage.removeChild(this._gameObjects[newRow][newCol][1]);
             }
         };
+        /**
+         * Finishes the game by showing appropriate message
+         * @param isWin Indicates whether user won the game or lost
+         */
         Game.prototype.gameFinished = function (isWin) {
             var text;
             if (isWin) {

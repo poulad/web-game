@@ -13,6 +13,9 @@ import Tween = createjs.Tween;
 import Shape = createjs.Shape;
 
 namespace CaveBrave {
+    /**
+     * Manages a Cave Brave game within a canvas
+     */
     export class Game {
         private static WorldMap: Tile[][] = [
             [Tile.Wall, Tile.Dino, Tile.Wall, Tile.Wall, Tile.Bats, Tile.Free],
@@ -42,6 +45,10 @@ namespace CaveBrave {
 
         private _keyHandler: EventListener = this.handleKeyDown.bind(this);
 
+        /**
+         * Constructs the game and loads necessary assets
+         * @param _canvas Canvas element for drawing game object to
+         */
         constructor(private _canvas: HTMLCanvasElement) {
             this._stage = new Stage(_canvas);
 
@@ -65,11 +72,17 @@ namespace CaveBrave {
             ]);
         }
 
+        /**
+         * Starts the game menu
+         */
         public start(): void {
             this.drawMenu();
             this._canvas.addEventListener(`click`, this._clickHandler);
         }
 
+        /**
+         * Draw game menu on the stage
+         */
         private drawMenu(): void {
             let caveBmp = new Bitmap(this._queue.getResult(`cave.svg`));
             let manBmp = new Bitmap(this._queue.getResult(`caveman.svg`));
@@ -88,6 +101,9 @@ namespace CaveBrave {
             this._stage.addChild(text);
         }
 
+        /**
+         * Populates the game stage according to the map and wires key event listeners
+         */
         private startGame(): void {
             this._canvas.removeEventListener(`click`, this._clickHandler);
             this._stage.removeAllChildren();
@@ -106,6 +122,9 @@ namespace CaveBrave {
             window.addEventListener("keydown", this._keyHandler);
         }
 
+        /**
+         * Draws objects in cells based on the world map
+         */
         private drawGameObjects(): void {
             for (let i = 0; i < Game.WorldMap.length; i++) {
                 for (let j = 0; j < Game.WorldMap[i].length; j++) {
@@ -121,6 +140,15 @@ namespace CaveBrave {
             }
         }
 
+        /**
+         * Draws a game objects in a cell
+         * Two objects are drawn in each cell and the second object (on top) is the FOG by default.
+         * Objects are added to respective cell in `this._gameObjects` after drawing.
+         * @param tileType Type of object to be drawn
+         * @param row row number for cell
+         * @param col column index for cell
+         * @returns {createjs.Bitmap[]} Array of two objects drawn in that cell
+         */
         private drawBitmapsAtCell(tileType: Tile, row: number, col: number): Bitmap[] {
             let img1Src: string;
             let img2Src: string = null;
@@ -174,6 +202,12 @@ namespace CaveBrave {
             return this._gameObjects[row][col];
         }
 
+        /**
+         * Provides the Bitmap object from cache.
+         * If bitmap is not already cached, first caches a new bitmap and then returns it.
+         * @param id Key for the cached object
+         * @returns {createjs.Bitmap} Bitmap object of cached object
+         */
         private getCachedBitmap(id: string): Bitmap {
             if (this._cache.hasOwnProperty(id)) {
                 return this._cache[id].clone();
@@ -184,6 +218,10 @@ namespace CaveBrave {
             }
         }
 
+        /**
+         * Handles key down events of the window and moves the caveman if any of the movement keys are pressed.
+         * @param e Keyboard event
+         */
         private handleKeyDown(e: KeyboardEvent): void {
             window.removeEventListener(`keydown`, this._keyHandler);
 
@@ -224,6 +262,11 @@ namespace CaveBrave {
             }
         }
 
+        /**
+         * Moves caveman to a specified cell and finishes the game if the cell is a final cell
+         * @param newRow Row index of new cell
+         * @param newCol Column index of new cell
+         */
         private moveCavemanTo(newRow: number, newCol: number): void {
             let easeFunction = Ease.linear;
             let tweenTime = 350;
@@ -289,6 +332,10 @@ namespace CaveBrave {
             }
         }
 
+        /**
+         * Finishes the game by showing appropriate message
+         * @param isWin Indicates whether user won the game or lost
+         */
         private gameFinished(isWin: boolean) {
             let text: createjs.Text;
             if (isWin) {

@@ -5,6 +5,10 @@
 // Description:     Contains ICaveMan interface for Cave Brave game
 
 namespace CaveBrave {
+    /**
+     * Cave brave game hero, the CaveMan
+     * This is used in the {CaveBrave.Game} class for controlling the movements on stage
+     */
     export interface ICaveMan {
         bitmap: createjs.Bitmap,
         isOnMove: boolean,

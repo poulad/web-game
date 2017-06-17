@@ -6,7 +6,7 @@
 var CaveBrave;
 (function (CaveBrave) {
     /**
-     * Holds type of cells in the game
+     * Holds different types of objects in the game
      */
     var Tile;
     (function (Tile) {
